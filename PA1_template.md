@@ -3,9 +3,17 @@
 
 ## Loading and preprocessing the data
 
+### Loading Data
+
+The activity data will be read from the local cached copy of file downloaded from the location assigned to activityZipURL, below:
+
 
 ```r
-activityData <- read.csv("activity.csv")  
+activityZipURL <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+temp <- tempfile()
+download.file(activityZipURL,temp)
+activityData <- read.csv(unz(temp ,as.character("activity.csv")))  
+unlink(temp)
 dailyTotalActivity <- aggregate(steps ~ date, data=activityData, FUN=sum, na.action = na.omit)
 ```
 
@@ -44,7 +52,12 @@ print(originalMedian)
 
 
 ```r
-timelyAverageActivity <- aggregate(steps ~ interval, data=activityData, FUN=mean, na.action = na.omit)
+timelyAverageActivity <-
+    aggregate(steps ~ interval,
+              data=activityData,
+              FUN=mean,
+              na.action = na.omit)
+
 plot(timelyAverageActivity$interval, timelyAverageActivity$steps, type="l")
 ```
 
@@ -84,8 +97,14 @@ In order to replace the missing values in the activity dataset, I'll replace the
 
 ```r
 activityDataImputed <- activityData
-activityDataImputed[is.na(activityData),1] <- mean(activityData$steps, na.rm=TRUE)
-dailyTotalImputedActivity <- aggregate(steps ~ date, data=activityDataImputed, FUN=sum, na.action = na.omit)
+activityDataImputed[is.na(activityData),1] <-
+    mean(activityData$steps, na.rm=TRUE)
+
+dailyTotalImputedActivity <-
+    aggregate(steps ~ date,
+              data=activityDataImputed,
+              FUN=sum,
+              na.action = na.omit)
 ```
 
 Here is a graph of the dataset with imputed missing values and associated mean and median
